@@ -97,12 +97,11 @@ class Measurer:
 if __name__ == '__main__':
     args = sys.argv
 
-    if len(args) != 3 or args[2] not in ['hsv', 'warp']:
-        print('Usage: measurer.py {} {}'.format('{input_file_path}', '{hsv|warp}'))
+    if len(args) != 2 or args[1] not in ['hsv', 'warp']:
+        print('Usage: measurer.py {} '.format('{hsv|warp}'))
         sys.exit(1)
 
-    input_video = args[1]
-    measure_type = args[2]
+    measure_type = args[1]
 
     measurer = Measurer(measure_type)
 
