@@ -105,7 +105,9 @@ if __name__ == '__main__':
     measure_type = args[2]
 
     measurer = Measurer(measure_type)
-    cap = cv2.VideoCapture(input_video)
+
+    #cap = cv2.VideoCapture("inputs/input.mp4") #동영상 파일에서 읽기
+    cap = cv2.VideoCapture('nvarguscamerasrc ! video/x-raw(memory:NVMM), width=640, height=480, format=(string)NV12, framerate=(fraction)15/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink', cv2.CAP_GSTREAMER)
     frame_counter = 0
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -115,19 +117,17 @@ if __name__ == '__main__':
     elif measure_type == 'warp':
         measurer.initialize_warp_trackbars(measurer.warp_initial_vals, frame_width, frame_height)
 
-    while True:
-        frame_counter += 1
-        if cap.get(cv2.CAP_PROP_FRAME_COUNT) == frame_counter:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            frame_counter = 0
-
+    while cap.isOpened():
+        # 카메라 프레임 읽기
         success, img = cap.read()
+
         if measure_type == 'hsv':
             measurer.measure_hsv(img)
         elif measure_type == 'warp':
             measurer.measure_warp_point(img)
 
-        key = cv2.waitKey(1)
+        # ESC를 누르면 종료
+        key = cv2.waitKey(1) & 0xFF
         if key == 27:
             break
 
