@@ -164,41 +164,31 @@ class LaneDetector:
 if __name__ == '__main__':
     args = sys.argv
 
-    if len(args) != 3:
-        print('Usage: lane_detector.py {} {}'.format('{input_file_path}', '{true|false}'))
+    if len(args) != 2:
+        print('Usage: lane_detector.py {}'.format('{true|false}'))
         sys.exit(1)
 
     try:
         detector = LaneDetector()
-        cap = cv2.VideoCapture(args[1])
+        # cap = cv2.VideoCapture(args[1])
+        cap = cv2.VideoCapture('nvarguscamerasrc ! video/x-raw(memory:NVMM), width=640, height=480, format=(string)NV12, framerate=(fraction)15/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink', cv2.CAP_GSTREAMER)
         frame_counter = 0
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        while True:
-            frame_counter += 1
-            if cap.get(cv2.CAP_PROP_FRAME_COUNT) == frame_counter:
-                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                frame_counter = 0
-
+        while cap.isOpened():
+            # 카메라 프레임 읽기
             success, img = cap.read()
-            img = cv2.resize(img, (frame_width, frame_height))
+            cv2.imshow('', img)
 
-            img_detect, x_center = detector.detect(img, True if args[2] == 'true' else False)
-            if args[2] == 'false':
-                print(x_center)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-            key = cv2.waitKey(1)
+            # ESC를 누르면 종료
+            key = cv2.waitKey(1) & 0xFF
             if key == 27:
                 break
 
         if cap.isOpened():
             cap.release()
 
-        cv2.destroyAllWindows()
     except KeyboardInterrupt:
         print("Shutting down")
         cv2.destroyAllWindows()
