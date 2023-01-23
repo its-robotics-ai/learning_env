@@ -27,6 +27,9 @@ class LaneDetector:
                                  [self.warp_point_left_bottom_x, self.warp_point_bottom_y],
                                  [self.warp_point_right_bottom_x, self.warp_point_bottom_y]]))
 
+        self.input_window_name = "InputWindow"
+        self.filter_window_name = "FilteredWindow"
+        self.warp_window_name = "WarpedWindow"
         self.lane_window_name = "LaneWindow"
         self.sliding_window_name = "SlidingWindow"
 
@@ -149,14 +152,22 @@ class LaneDetector:
         h, w = img_filtered.shape
         img_warp_filtered = self.warp_img(img_filtered, self.points, w, h-self.warp_point_top_y)
         img_lane, lane, lane_poly, x_center = self.sliding_window(img_warp_filtered)
+        img_out = in_img[:, :].copy()
 
         for i in range(x_center.size):
-            cv2.circle(in_img, (int(x_center[i]), i + self.warp_point_top_y), 2, (255, 0, 0), -1)
+            cv2.circle(img_out, (int(x_center[i]), i + self.warp_point_top_y), 2, (255, 0, 0), -1)
 
         if draw_windows:
-            cv2.moveWindow(self.sliding_window_name, in_img.shape[1], 0)
-            cv2.imshow(self.lane_window_name, in_img)
+            cv2.moveWindow(self.input_window_name, 0, 0)
+            cv2.moveWindow(self.filter_window_name, in_img.shape[1], 0)
+            cv2.moveWindow(self.warp_window_name, 0, in_img.shape[0])
+            cv2.moveWindow(self.sliding_window_name, 0, (in_img.shape[0] + img_warp_filtered.shape[0]))
+            cv2.moveWindow(self.lane_window_name, in_img.shape[1], in_img.shape[0])
+            cv2.imshow(self.input_window_name, in_img)
+            cv2.imshow(self.filter_window_name, img_filtered)
+            cv2.imshow(self.warp_window_name, img_warp_filtered)
             cv2.imshow(self.sliding_window_name, img_lane)
+            cv2.imshow(self.lane_window_name, img_out)
 
         return in_img, x_center
 
@@ -170,8 +181,8 @@ if __name__ == '__main__':
 
     try:
         detector = LaneDetector()
-        # cap = cv2.VideoCapture('./inputs/input.mp4')
-        cap = cv2.VideoCapture('nvarguscamerasrc ! video/x-raw(memory:NVMM), width=640, height=480, format=(string)NV12, framerate=(fraction)15/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink', cv2.CAP_GSTREAMER)
+        cap = cv2.VideoCapture('./inputs/input.mp4')
+        # cap = cv2.VideoCapture('nvarguscamerasrc ! video/x-raw(memory:NVMM), width=640, height=480, format=(string)NV12, framerate=(fraction)15/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink', cv2.CAP_GSTREAMER)
         frame_counter = 0
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
