@@ -170,7 +170,7 @@ if __name__ == '__main__':
 
     try:
         detector = LaneDetector()
-        # cap = cv2.VideoCapture(args[1])
+        # cap = cv2.VideoCapture('./inputs/input.mp4')
         cap = cv2.VideoCapture('nvarguscamerasrc ! video/x-raw(memory:NVMM), width=640, height=480, format=(string)NV12, framerate=(fraction)15/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink', cv2.CAP_GSTREAMER)
         frame_counter = 0
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -179,7 +179,10 @@ if __name__ == '__main__':
         while cap.isOpened():
             # 카메라 프레임 읽기
             success, img = cap.read()
-            cv2.imshow('', img)
+            img = cv2.resize(img, (frame_width, frame_height))
+            img_detect, x_center = detector.detect(img, True if args[1] == 'true' else False)
+            if not args[1]:
+                print(x_center)
 
             # ESC를 누르면 종료
             key = cv2.waitKey(1) & 0xFF
