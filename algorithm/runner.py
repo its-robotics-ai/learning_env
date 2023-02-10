@@ -2,7 +2,7 @@ import sys
 
 import cv2
 # import onnx
-import onnxruntime
+# import onnxruntime
 import torch
 from lane_detector import LaneDetector
 import time
