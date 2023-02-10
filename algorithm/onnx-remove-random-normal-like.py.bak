@@ -42,10 +42,13 @@ def replace_random_normal_with_constant(model: ModelProto) -> ModelProto:
     copied = copy.deepcopy(model)
     for i, node in enumerate(model.graph.node):
         if node.op_type == "RandomNormalLike":
+            node.op_type = "Constant"
+            # node.input._values = ['32']
             new_node = NodeProto(
                 name=f"ConstantFrom{node.name}",  # set unique name
                 op_type="Constant",
                 output=node.output,
+                # input=node.input,
                 doc_string="This node is replaced from RandomNormal.\n\n" + node.doc_string
             )
 
@@ -59,7 +62,8 @@ def replace_random_normal_with_constant(model: ModelProto) -> ModelProto:
             # array([ 1.24379277, -1.09057736], dtype=float32)
             # >>> struct.unpack("<f", bytearray(x)[:4])
             # (1.2437927722930908,)
-            constant_values = rnd.randn(*shape).astype('float32')
+            constant_values = abs(rnd.randn(*shape).astype('float32'))
+            constant_values[0] = 1.0
             new_node.attribute.append(
                 AttributeProto(
                     name="value",
@@ -74,14 +78,29 @@ def replace_random_normal_with_constant(model: ModelProto) -> ModelProto:
             copied.graph.node.pop(i)
             copied.graph.node.insert(i, new_node)
 
-        if node.name == "Div_21":
-            copied.graph.node.pop(i)
-
-    for i, node in enumerate(model.graph.node):
         if node.name == "Clip_20":
             copied.graph.node.pop(i)
 
-    copied.graph.output.pop(4)
+    for i, node in enumerate(copied.graph.node):
+        if node.name == "Div_21":
+            copied.graph.node.pop(i)
+
+    for i, out in enumerate(copied.graph.output):
+        if out.name == "version_number":
+            copied.graph.output.pop(i)
+
+    for i, out in enumerate(copied.graph.output):
+        if out.name == "memory_size":
+            copied.graph.output.pop(i)
+
+    for i, out in enumerate(copied.graph.output):
+        if out.name == "continuous_action_output_shape":
+            copied.graph.output.pop(i)
+
+    for i, out in enumerate(copied.graph.output):
+        if out.name == "deterministic_continuous_actions":
+            copied.graph.output.pop(i)
+
     onnx.checker.check_model(copied)
     return copied
 
