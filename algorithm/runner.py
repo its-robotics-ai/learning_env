@@ -1,7 +1,7 @@
 import sys
 
 import cv2
-import onnx
+# import onnx
 import onnxruntime
 import torch
 from lane_detector import LaneDetector
@@ -14,7 +14,7 @@ class Runner:
     def __init__(self, model_path, use_external, external_url):
         self.model_path = model_path
         self.detector = LaneDetector()
-        self.session = onnxruntime.InferenceSession(model_path)
+        # self.session = onnxruntime.InferenceSession(model_path)
         self.use_external = use_external
         self.external_url = external_url
 
@@ -25,31 +25,32 @@ class Runner:
             return self.inference_internal(x)
 
     def inference_internal(self, x):
-        ort_inputs = {self.session.get_inputs()[0].name: x}
+        # ort_inputs = {self.session.get_inputs()[0].name: x}
+        #
+        # ort_outs = self.session.run(None, ort_inputs)
+        #
+        # left_speed = round(float(ort_outs[2][0][0]), 1)
+        # right_speed = round(float(ort_outs[2][0][1]), 1)
 
-        ort_outs = self.session.run(None, ort_inputs)
-
-        left_speed = round(float(ort_outs[2][0][0]), 1)
-        right_speed = round(float(ort_outs[2][0][1]), 1)
-
-        return {"left_speed": left_speed, "right_speed": right_speed}
+        # return {"left_speed": left_speed, "right_speed": right_speed}
+        return {"left_speed": 0.5, "right_speed": 0.5}
 
     def inference_external(self, x):
         x_centers = " ".join(str(s) for s in x[0])
         response = requests.post(self.external_url, json={"centers": x_centers})
         return response.json()
 
-    def show_model_info(self):
-        onnx_model = onnx.load(self.model_path)
-        onnx.checker.check_model(onnx_model)
-
-        print(onnx_model.graph)
-
-        for t in self.session.get_inputs():
-            print("input:", t.name, t.type, t.shape)
-
-        for t in self.session.get_outputs():
-            print("output:", t.name, t.type, t.shape)
+    # def show_model_info(self):
+    #     onnx_model = onnx.load(self.model_path)
+    #     onnx.checker.check_model(onnx_model)
+    #
+    #     print(onnx_model.graph)
+    #
+    #     for t in self.session.get_inputs():
+    #         print("input:", t.name, t.type, t.shape)
+    #
+    #     for t in self.session.get_outputs():
+    #         print("output:", t.name, t.type, t.shape)
 
 
 if __name__ == '__main__':
