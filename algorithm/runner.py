@@ -17,6 +17,7 @@ class Runner:
         # self.session = onnxruntime.InferenceSession(model_path)
         self.use_external = use_external
         self.external_url = external_url
+        self.robot= Robot()
 
     def inference(self, x):
         if self.use_external:
@@ -40,7 +41,8 @@ class Runner:
         response = requests.post(self.external_url, json={"centers": x_centers})
         return response.json()
 
-    # def show_model_info(self):
+    def show_model_info(self):
+        pass
     #     onnx_model = onnx.load(self.model_path)
     #     onnx.checker.check_model(onnx_model)
     #
@@ -81,12 +83,17 @@ if __name__ == '__main__':
         # output = runner.inference_internal(x_center)
         output = runner.inference(x_center)
 
+        left_action = output["left_speed"]
+        right_action = output["right_speed"]
+
         print(f'center_input: {x_center}')
         print(f'left: {output["left_speed"]}, right: {output["right_speed"]}')
-        robot.left(speed=left_action)
-        robot.right(speed=right_action)
+        #         runner.robot.left(speed=abs(left_action))
+        #         runner.robot.right(speed=abs(right_action)
 
-        time.sleep(2)
+        runner.robot.set_motors(abs(float(left_action)), abs(float(right_action)))
+        time.sleep(3)
+        runner.robot.stop()
 
 
         # inference(img)
