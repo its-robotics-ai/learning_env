@@ -1,8 +1,6 @@
 
 9
 	README.md,8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
-E
-algorithm/measurer.py,6/b/6bbde71cf4834929417a3215ad0147719717286d
 B
 image_processor.py,a/2/a244a8c11ce6feef1f4a63b28ee8ae8a23038235
 :
